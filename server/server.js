@@ -12,6 +12,7 @@ const usersRoutes = require('./routes/users');
 const gameRoutes = require('./routes/game');
 
 const app = express();
+app.set('trust proxy', 1);
 // Secure HTTP headers (prevents clickjacking, MIME sniffing, and other common attacks).
 app.use(helmet());
 
