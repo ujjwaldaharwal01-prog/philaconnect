@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-offwhite font-sans text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.gold.500');
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* Centered page container used by every section. */
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /*
+   * Perforated stamp edge.
+   * A CSS mask punches semicircular "holes" along all four edges:
+   * four edge strips (each a repeating half-circle cut-out) plus a solid centre.
+   * --r is the hole radius, --s the spacing between holes.
+   * Because masks clip box-shadows, shadows are applied by a parent using drop-shadow.
+   */
+  .stamp-perf {
+    --r: 5px;
+    --s: 15px;
+    -webkit-mask:
+      radial-gradient(circle var(--r) at 50% 0, #0000 97%, #000) top / var(--s) var(--r) repeat-x,
+      radial-gradient(circle var(--r) at 50% 100%, #0000 97%, #000) bottom / var(--s) var(--r) repeat-x,
+      radial-gradient(circle var(--r) at 0 50%, #0000 97%, #000) left / var(--r) var(--s) repeat-y,
+      radial-gradient(circle var(--r) at 100% 50%, #0000 97%, #000) right / var(--r) var(--s) repeat-y,
+      linear-gradient(#000 0 0) center / calc(100% - 2 * var(--r)) calc(100% - 2 * var(--r)) no-repeat;
+    mask:
+      radial-gradient(circle var(--r) at 50% 0, #0000 97%, #000) top / var(--s) var(--r) repeat-x,
+      radial-gradient(circle var(--r) at 50% 100%, #0000 97%, #000) bottom / var(--s) var(--r) repeat-x,
+      radial-gradient(circle var(--r) at 0 50%, #0000 97%, #000) left / var(--r) var(--s) repeat-y,
+      radial-gradient(circle var(--r) at 100% 50%, #0000 97%, #000) right / var(--r) var(--s) repeat-y,
+      linear-gradient(#000 0 0) center / calc(100% - 2 * var(--r)) calc(100% - 2 * var(--r)) no-repeat;
+  }
+
+  /* Scroll-reveal: elements fade/slide in when .is-visible is added by <Reveal>. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

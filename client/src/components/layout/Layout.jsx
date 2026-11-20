@@ -1,0 +1,35 @@
+import ChatWidget from '../assistant/ChatWidget';
+import { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import Navbar from './Navbar';
+import Footer from './Footer';
+
+/**
+ * Shared page shell: skip link, navbar, the routed page (<Outlet />) and footer.
+ * Also scrolls to the top whenever the route changes.
+ */
+export default function Layout() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Keyboard users can jump straight past the navigation */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-forest-900 focus:px-4 focus:py-2 focus:text-cream"
+      >
+        Skip to content
+      </a>
+      <Navbar />
+      <main id="main" className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+      <ChatWidget />
+    </div>
+  );
+}

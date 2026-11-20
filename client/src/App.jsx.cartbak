@@ -1,0 +1,31 @@
+import { Route, Routes } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import HomePage from './pages/HomePage';
+import PlaceholderPage from './pages/PlaceholderPage';
+import NotFoundPage from './pages/NotFoundPage';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Marketplace from './pages/Marketplace';
+import { PLACEHOLDER_PAGES } from './constants/site';
+
+/**
+ * Route table. Everything renders inside <Layout> (navbar + footer).
+ * Routes listed in PLACEHOLDER_PAGES show a "coming soon" page until their feature is built;
+ * replace each with the real page component as we go.
+ */
+export default function App() {
+  return (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        {Object.keys(PLACEHOLDER_PAGES).map((path) => (
+          <Route key={path} path={path} element={<PlaceholderPage />} />
+        ))}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
+  );
+}

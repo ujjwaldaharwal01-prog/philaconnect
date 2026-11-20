@@ -1,0 +1,170 @@
+import { useCart } from '../../context/CartContext';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { NAV_LINKS } from '../../constants/site';
+import Logo from '../ui/Logo';
+import { CartIcon, CloseIcon, MenuIcon } from '../ui/Icons';
+
+/**
+ * Sticky top navigation.
+ *  - Desktop: logo, centred links, cart icon, highlighted Login button.
+ *  - Mobile: hamburger that opens a full-width panel (closes on route change or Escape).
+ *  - Active link gets a gold underline via React Router's <NavLink>.
+ */
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { pathname } = useLocation();
+
+  // Logged-in user, read from localStorage (set by Login/Register).
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
+  };
+
+  // Placeholder: the real count arrives when the shopping cart is built.
+  const { itemCount: cartCount } = useCart();
+
+  // Close the mobile menu whenever the route changes.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Add a shadow/background once the page is scrolled.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Escape closes the mobile menu (keyboard accessibility).
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const regularLinks = NAV_LINKS.filter((l) => !l.cta);
+  const ctaLink = NAV_LINKS.find((l) => l.cta);
+
+  const desktopLinkClass = ({ isActive }) =>
+    `relative px-1 py-2 text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:bg-gold-500 after:transition-transform after:duration-300 ${
+      isActive
+        ? 'text-forest-900 after:scale-x-100'
+        : 'text-forest-800/75 hover:text-forest-900 after:scale-x-0 hover:after:scale-x-100'
+    }`;
+
+  return (
+    <header
+      className={`sticky top-0 z-50 border-b transition duration-300 ${
+        scrolled
+          ? 'border-forest-800/10 bg-cream/95 shadow-[0_6px_24px_-12px_rgba(20,40,31,0.35)] backdrop-blur'
+          : 'border-transparent bg-cream/90 backdrop-blur'
+      }`}
+    >
+      <nav className="container-page flex h-16 items-center justify-between gap-6" aria-label="Main navigation">
+        <Logo />
+
+        {/* Desktop links */}
+        <ul className="hidden items-center gap-8 lg:flex">
+          {regularLinks.map((link) => (
+            <li key={link.to}>
+              <NavLink to={link.to} end={link.to === '/'} className={desktopLinkClass}>
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            to="/cart"
+            aria-label={`Shopping cart, ${cartCount} items`}
+            className="relative rounded-full p-2 text-forest-800 transition hover:bg-forest-800/5"
+          >
+            <CartIcon />
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-500 px-1 text-[10px] font-bold text-forest-950">
+              {cartCount}
+            </span>
+          </Link>
+
+          {user ? (
+            <div className="hidden items-center gap-3 lg:flex">
+              <span className="text-sm font-medium text-forest-800">Hi, {user.name}</span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full bg-forest-800 px-5 py-2 text-sm font-semibold text-gold-300 transition hover:bg-forest-700"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            ctaLink && (
+              <Link
+                to={ctaLink.to}
+                className="hidden rounded-full bg-forest-800 px-5 py-2 text-sm font-semibold text-gold-300 transition hover:bg-forest-700 motion-safe:hover:-translate-y-0.5 lg:inline-flex"
+              >
+                {ctaLink.label}
+              </Link>
+            )
+          )}
+
+          <button
+            type="button"
+            className="rounded-full p-2 text-forest-800 transition hover:bg-forest-800/5 lg:hidden"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile panel */}
+      {open && (
+        <div id="mobile-menu" className="border-t border-forest-800/10 bg-cream lg:hidden">
+          <ul className="container-page flex flex-col gap-1 py-4">
+            {NAV_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  end={link.to === '/'}
+                  className={({ isActive }) =>
+                    `block rounded-lg px-3 py-3 text-base font-medium transition ${
+                      link.cta
+                        ? 'mt-2 bg-forest-800 text-center text-gold-300'
+                        : isActive
+                          ? 'bg-forest-800/5 text-forest-900'
+                          : 'text-forest-800/80 hover:bg-forest-800/5'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+            {user && (
+              <li>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="mt-2 block w-full rounded-lg bg-forest-800 px-3 py-3 text-center text-base font-medium text-gold-300"
+                >
+                  Logout ({user.name})
+                </button>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+    </header>
+  );
+}
